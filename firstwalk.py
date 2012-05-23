@@ -3,8 +3,9 @@ import vizact
 import vizshape
 viz.go()
 
-viz.clearcolor(viz.SKYBLUE)
-ground = viz.add('tut_ground.wrl')
+#viz.clearcolor(viz.SKYBLUE)
+#ground = viz.add('tut_ground.wrl')
+vizshape.addGrid()
 
 #Kinect Tracker object ID's
 #myHead = vrpn.addTracker( 'Tracker0@localhost', HEAD).
@@ -42,8 +43,8 @@ shapes = []
 vrpn = viz.addExtension('vrpn7.dle')
 
 #set the camera facing the avatar
-viz.MainView.setPosition([-6,2,0])
-viz.MainView.lookat(0, 1.75, 0)
+viz.MainView.setPosition(0,1,-8)
+viz.MainView.lookat(2, 1, 0)
 
 male = viz.add('vcc_male.cfg')
 male.setPosition(-1,0,0)
@@ -90,7 +91,7 @@ def getInitial():
 def setDown():
 	global prevStep
 	prevStep = "DOWN"
-	viz.MainView.velocity(0,0,0)
+#	viz.MainView.velocity(0,0,0)
 
 def step():
 	global prevStep
@@ -98,12 +99,12 @@ def step():
 	print prevStep
 	walk = vizact.walkTo([male.getPosition()[0] + 1, 0,male.getPosition()[2]], walkSpeed = 1)
 	male.runAction(walk)
-	viz.MainView.velocity(0,0,1)
+#	viz.MainView.velocity(0,0,1)
 	vizact.ontimer2(.9,0,setDown)
 		
 def checkStep():
-#	yaw,pitch,roll = Torso.getEuler()
-#	print yaw,pitch,roll
+	yaw,pitch,roll = Torso.getEuler()
+	print yaw,pitch,roll
 	print prevStep
 	LFvert = (LF.getPosition())[1]
 	RFvert = (RF.getPosition())[1]
