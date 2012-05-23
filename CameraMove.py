@@ -1,4 +1,4 @@
-import viz
+﻿import viz
 import vizact
 import vizshape
 import math
@@ -43,13 +43,7 @@ shapes = []
 #start vrpn
 vrpn = viz.addExtension('vrpn7.dle')
 
-#set the camera facing the avatar
-viz.MainView.setPosition(0,2,-3)
-viz.MainView.lookat(0, 2,1)
-
-male = viz.add('vcc_male.cfg')
-male.setPosition(0,0,0)
-male.setEuler(0,0,0)
+viz.MainView.setPosition(0,2,0)
 
 lastX = 0
 lastZ = 3
@@ -57,7 +51,7 @@ lastZ = 3
 for i in range(0,24):
 	t = vrpn.addTracker( 'Tracker0@localhost',i )
 	
-	s = vizshape.addSphere(radius=.1)
+	s = vizshape.addSphere(radius=0)
 	
 	if i == 2: #for the torso:
 		s.color(viz.RED)
@@ -80,6 +74,10 @@ RF = vrpn.addTracker('Tracker0@localhost', RIGHTFOOT)
 LF = vrpn.addTracker('Tracker0@localhost', LEFTFOOT)
 RK = vrpn.addTracker('Tracker0@localhost', RIGHTKNEE)
 LK = vrpn.addTracker('Tracker0@localhost', LEFTKNEE)
+RH = vrpn.addTracker('Tracker0@localhost', RIGHTHIP)
+LH = vrpn.addTracker('Tracker0@localhost', LEFTHIP)
+LS = vrpn.addTracker('Tracker0@localhost', LEFTSHOULDER)
+RS = vrpn.addTracker('Tracker0@localhost', RIGHTSHOULDER)
 Torso = vrpn.addTracker('Tracker0@localhost', TORSO)
 
 initialStep = 0
@@ -87,17 +85,28 @@ prevStep = "DOWN"
 yaw = 0
 checkYaw = 0
 
-def calcUnitVector():
-	pos = male.getPosition()
+def crossProduct(a,b):
+	c = [a[1]*b[2] - a[2]*b[1],
+	     a[2]*b[0] - a[0]*b[2],
+	     a[0]*b[1] - a[1]*b[0]]
 	
-	x = math.sin(math.radians(-yaw))
-	z = math.cos(math.radians(yaw))
+	return c
+
+def calcNormal():
+	a1 = [RS.getPosition()[0] - LS.getPosition()[0], RS.getPosition()[1] - LS.getPosition()[1], RS.getPosition()[2] - LS.getPosition()[2]]
+	b1 = [RH.getPosition()[0] - RS.getPosition()[0], RH.getPosition()[1] - RS.getPosition()[1], RH.getPosition()[2] - RS.getPosition()[2]]
+	c1 = crossProduct(a1,b1)
 	
-	print 'Yaw:', yaw
-	print 'x', x
-	print 'z', z
+	a2 = [LH.getPosition()[0] - RH.getPosition()[0], LH.getPosition()[1] - RH.getPosition()[1], LH.getPosition()[2] - RH.getPosition()[2]]
+	b2 = [LS.getPosition()[0] - LH.getPosition()[0], LS.getPosition()[1] - LH.getPosition()[1], LS.getPosition()[2] - LH.getPosition()[2]]
+	c2 = crossProduct(a2,b2)
 	
-	return x, z
+	normal = [(c1[0] + c2[0])/2, -(c1[2] + c2[2])/2]
+	normalMag = math.hypot(normal[0],normal[1])
+	x = normal[0]/normalMag
+	z = normal[1]/normalMag
+	
+	return x,z
 
 def getInitial():
 	global initialStep 
@@ -111,15 +120,17 @@ def setDown():
 	viz.MainView.velocity(0,0,0)
 
 def step():
-	global prevStep, lastX, lastZ
+	global prevStep
 	prevStep = "UP"
-	x,z = calcUnitVector()
-	viz.MainView.velocity(lastX, 0, lastZ)
-	lastX = x
-	lastZ = z
-	walk = vizact.walkTo([x + male.getPosition()[0], 0, z + male.getPosition()[2]], walkSpeed = 1)
-	viz.MainView.lookAt([male.getPosition()[0],2,male.getPosition()[2]])
-	male.runAction(walk)
+	
+	x,z = calcNormal()
+	
+	viz.MainView.velocity(x, 0, z)
+	
+	x = math.sin(math.radians(-yaw)) + viz.MainView.getPosition()[0]
+	z = math.cos(math.radians(yaw)) + viz.MainView.getPosition()[2]
+		
+	viz.MainView.lookAt([x,2,z])
 	vizact.ontimer2(.9,0,setDown)
 		
 def checkStep():
@@ -128,22 +139,16 @@ def checkStep():
 	
 	yaw = Torso.getEuler()[0]
 	
-#	print 'Yaw', yaw
-#	print 'CheckYaw', checkYaw
-	
 	LFvert = (LF.getPosition())[1]
 	RFvert = (RF.getPosition())[1]
 	
-	if (yaw >= 5 + checkYaw):
-		spin = vizact.spin(0,180-yaw,0,-90,.13)
-		male.addAction(spin)
+	x = math.sin(math.radians(-yaw)) + viz.MainView.getPosition()[0]
+	z = math.cos(math.radians(yaw)) + viz.MainView.getPosition()[2]
 		
-	elif (yaw <= checkYaw - 5):
-		spin = vizact.spin(0,180 + yaw, 0,+90,.13)
-		male.addAction(spin)
-			
+	viz.MainView.lookAt([x,2,z])
+		
 	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep):
 		step()
 
 vizact.ontimer2(0.5, 0, getInitial)
-vizact.ontimer(0.15, checkStep)
+vizact.ontimer(1/60, checkStep)
