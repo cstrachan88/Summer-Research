@@ -1,12 +1,22 @@
-﻿import viz
+import viz
 import vizact
 import vizshape
 import math
-viz.go()
+viz.go(viz.PROMPT)
 
-#viz.clearcolor(viz.SKYBLUE)
-#ground = viz.add('tut_ground.wrl')
-vizshape.addGrid()
+
+tracker = viz.add('intersense.dls')
+#viz.translate(viz.HEAD_POS,0,-1.8,0)
+#viz.eyeheight(1.8);
+ground = viz.add('tut_ground.wrl')
+#panorama = viz.add('panorama.ive')
+#scaffold = viz.add('scaffold.ive')
+
+##viz.clearcolor(viz.SKYBLUE)
+#piazza = viz.addChild('piazza.osgb')
+
+#vizshape.addGrid()
+viz.collision(viz.ON)
 
 #Kinect Tracker object ID's
 #myHead = vrpn.addTracker( 'Tracker0@localhost', HEAD).
@@ -43,13 +53,13 @@ shapes = []
 #start vrpn
 vrpn = viz.addExtension('vrpn7.dle')
 
-viz.MainView.setPosition(0,2,0)
+viz.MainView.setPosition(-1,8,1)
 
 lastX = 0
 lastZ = 3
 #now add all trackers and link a shape to it
 for i in range(0,24):
-	t = vrpn.addTracker( 'Tracker0@localhost',i )
+	t = vrpn.addTracker( 'Tracker0@10.20.31.37',i )
 	
 	s = vizshape.addSphere(radius=0)
 	
@@ -70,15 +80,15 @@ for i in range(0,24):
 	links.append(l)
 	shapes.append(s)
 	
-RF = vrpn.addTracker('Tracker0@localhost', RIGHTFOOT)
-LF = vrpn.addTracker('Tracker0@localhost', LEFTFOOT)
-RK = vrpn.addTracker('Tracker0@localhost', RIGHTKNEE)
-LK = vrpn.addTracker('Tracker0@localhost', LEFTKNEE)
-RH = vrpn.addTracker('Tracker0@localhost', RIGHTHIP)
-LH = vrpn.addTracker('Tracker0@localhost', LEFTHIP)
-LS = vrpn.addTracker('Tracker0@localhost', LEFTSHOULDER)
-RS = vrpn.addTracker('Tracker0@localhost', RIGHTSHOULDER)
-Torso = vrpn.addTracker('Tracker0@localhost', TORSO)
+RF = vrpn.addTracker('Tracker0@10.20.31.37', RIGHTFOOT)
+LF = vrpn.addTracker('Tracker0@10.20.31.37', LEFTFOOT)
+RK = vrpn.addTracker('Tracker0@10.20.31.37', RIGHTKNEE)
+LK = vrpn.addTracker('Tracker0@10.20.31.37', LEFTKNEE)
+RH = vrpn.addTracker('Tracker0@10.20.31.37', RIGHTHIP)
+LH = vrpn.addTracker('Tracker0@10.20.31.37', LEFTHIP)
+LS = vrpn.addTracker('Tracker0@10.20.31.37', LEFTSHOULDER)
+RS = vrpn.addTracker('Tracker0@10.20.31.37', RIGHTSHOULDER)
+Torso = vrpn.addTracker('Tracker0@10.20.31.37', TORSO)
 
 initialStep = 0
 prevStep = "DOWN"
@@ -130,7 +140,7 @@ def step():
 	x = math.sin(math.radians(-yaw)) + viz.MainView.getPosition()[0]
 	z = math.cos(math.radians(yaw)) + viz.MainView.getPosition()[2]
 		
-	viz.MainView.lookAt([x,2,z])
+	#viz.MainView.lookat([x,2,z])
 	vizact.ontimer2(.9,0,setDown)
 		
 def checkStep():
@@ -145,10 +155,19 @@ def checkStep():
 	x = math.sin(math.radians(-yaw)) + viz.MainView.getPosition()[0]
 	z = math.cos(math.radians(yaw)) + viz.MainView.getPosition()[2]
 		
-	viz.MainView.lookAt([x,2,z])
-		
+#	viz.MainView.lookat([x,2,z])
+	
+	data = tracker.getData()
+	
 	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep):
 		step()
+	
+	viz.MainView.rotate(data[3]+90,data[4],data[5],'',viz.BODY_ORI)
+	
+	#viz.MainView.setEuler(data[3], data[4], data[5])
+	
+	
+	
 
 vizact.ontimer2(0.5, 0, getInitial)
 vizact.ontimer(1/60, checkStep)
