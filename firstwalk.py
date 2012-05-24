@@ -59,7 +59,7 @@ for i in range(0,24):
 	
 	s = vizshape.addSphere(radius=.1)
 	
-	if i == 2: #for the torso:
+	if i == TORSO:
 		s.color(viz.RED)
 		#display an arrow pointing away from the avatar
 		global arrow
@@ -68,7 +68,7 @@ for i in range(0,24):
 		arrow.setPosition([0,0,-0.75])
 		arrow.setEuler([0,-90,0])
 		
-	elif i in [5,11,16,20]:
+	elif i in [LEFTSHOULDER,RIGHTSHOULDER,LEFTHIP,RIGHTHIP]:
 		s.color(viz.BLUE)
 		
 	l = viz.link(t,s)
