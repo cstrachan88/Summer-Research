@@ -2,7 +2,9 @@ import viz
 import vizact
 import vizshape
 import math
-viz.go()
+import datetime
+
+viz.go()#viz.PROMPT)
 
 
 ''' *************************** Set Up Scene **************************** '''
@@ -95,6 +97,9 @@ prevStep = "DOWN"
 initialStep = 0
 checkYaw = 0
 yaw = 0
+now = datetime.datetime.now()
+counter = 0
+filename = 'Output files/output {}-{} {},{},{}.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
 ''' ********************* End of Initializations ************************ '''
 
 
@@ -127,13 +132,26 @@ def step():
 
 
 def checkStep():
-	global checkYaw, yaw
-	checkYaw = yaw
-	yaw = Torso.getEuler()[0]
+	global checkYaw, yaw, counter
 	
 	LFvert = (LF.getPosition())[1]
 	RFvert = (RF.getPosition())[1]
+
 	
+#	************************* Output to file ****************************	#
+	counter += 1
+	#if counter % 30 == 0:
+	with open(filename, 'a') as f:
+		x,y,z = viz.MainView.getPosition()
+		s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(checkYaw)+','+str(yaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
+		f.write(s)
+	f.closed
+#	************************** End of output ****************************	#
+	
+	
+	checkYaw = yaw
+	yaw = Torso.getEuler()[0]
+		
 	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep):
 		step()
 	
@@ -155,6 +173,10 @@ def getInitial():
 	initialFeet = ((LF.getPosition())[1] + (RF.getPosition())[1])/2
 	
 	initialStep = (initialKnee + initialFeet) * .6
+	
+	with open(filename, 'w') as f:
+		f.write('runs of checkStep,LF Height,RF Height,Step Threshold,checkYaw,yaw,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
+	f.closed
 
 
 vizact.ontimer2(0.33, 2, getInitial)
