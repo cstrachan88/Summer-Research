@@ -108,14 +108,17 @@ LSb = vrpn.addTracker(trackerLocationB, LEFTSHOULDER)
 viz.MainView.setPosition(0,1.8,-3)
 prevStep = "DOWN"
 initialStep = 0
-checkYaw = 0
 yaw = 0
+yawB = 0
 yaws = []
+yawsB = []
 aveYaw = 0
+aveYawB = 0
 YAW_SIZE = 10
+finalYaw = 0
 now = datetime.datetime.now()
 counter = 0
-#filename = 'Output files/output {}-{} {},{},{}.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
+filename = 'Output files/output {}-{} {},{},{}.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
 ''' ********************* End of Initializations ************************ '''
 
 
@@ -137,6 +140,22 @@ def unitVector(x,y,z):
 	return x/vecMag, y/vecMag, z/vecMag
 
 
+def averageYaw():
+	global yaw, yawB, yaws, yawsB, aveYaw, aveYawB, YAW_SIZE
+	if len(yaws) > YAW_SIZE:
+		yaws.pop(0)		
+	
+	yaws.append(yaw)
+	aveYaw = sum(yaws) / len(yaws)	
+	
+	if len(yawsB) > YAW_SIZE:
+		yawsB.pop(0)		
+	
+	yawsB.append(yawB)
+	aveYawB = sum(yawsB) / len(yawsB)
+
+	
+
 def step():
 	global prevStep
 	prevStep = "UP"
@@ -148,7 +167,7 @@ def step():
 
 
 def checkStep():
-	global checkYaw, yaw, counter, yaws, aveYaw, YAW_SIZE
+	global yaw, yawB, counter, yaws, yawB, YAW_SIZE, aveYaw, aveYawB, finalYaw
 	
 	LFvert = (LF.getPosition())[1]
 	RFvert = (RF.getPosition())[1]
@@ -157,31 +176,35 @@ def checkStep():
 #	************************* Output to file ****************************	#
 	counter += 1
 	#if counter % 30 == 0:
-#	with open(filename, 'a') as f:
-#		x,y,z = viz.MainView.getPosition()
-#		s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(checkYaw)+','+str(yaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
-#		f.write(s)
-#	f.closed
+	with open(filename, 'a') as f:
+		x,y,z = viz.MainView.getPosition()
+		s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(yaw)+','+str(aveYaw)+','+str(yawB)+','+str(aveYawB)+','+str(finalYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
+		f.write(s)
+	f.closed
 #	************************** End of output ****************************	#
 	
-	
-	checkYaw = yaw
+
+
 	yaw = Torso.getEuler()[0]
+	yawB = TorsoB.getEuler()[0]
 	
-	if len(yaws) > YAW_SIZE:
-		yaws.pop(0)
-		
+	averageYaw()
+	if aveYaw >= -45 and aveYaw <= 45:
+		if aveYawB > 0:
+			finalYaw = aveYaw
+		else:
+			finalYaw = aveYaw - (aveYaw > 0) * 180
+			
+	elif aveYawB >= -45 and aveYawB <= 45:
+			finalYaw = aveYawB + (aveYaw > 0) * 90
 	
-	yaws.append(yaw)
-	aveYaw = sum(yaws) / len(yaws)
-	print aveYaw
 	
 		
 	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep):
 		step()
 	
 	# Code for movement using torso yaw
-	x,y,z = unitVector(math.cos(math.radians(aveYaw+90)), 0, math.sin(math.radians(aveYaw+90)))
+	x,y,z = unitVector(math.cos(math.radians(finalYaw+90)), 0, math.sin(math.radians(finalYaw+90)))
 	x = x + viz.MainView.getPosition()[0]
 	z = z + viz.MainView.getPosition()[2]
 	viz.MainView.lookat([x,1.8,z])
@@ -199,9 +222,9 @@ def getInitial():
 	
 	initialStep = (initialKnee + initialFeet) * .7
 	
-#	with open(filename, 'w') as f:
-#		f.write('runs of checkStep,LF Height,RF Height,Step Threshold,checkYaw,yaw,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
-#	f.closed
+	with open(filename, 'w') as f:
+		f.write('runs of checkStep,LF Height,RF Height,Step Threshold,yawA,yawAave,yawB,yawBave,finalYaw,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
+	f.closed
 
 
 vizact.ontimer2(0.33, 2, getInitial)
