@@ -52,10 +52,11 @@ shapes = []
 
 # Start vrpn
 vrpn = viz.addExtension('vrpn7.dle')
-
+trackerLocationA = 'Tracker0@10.10.33.167'
+trackerLocationB = 'Tracker0@10.10.34.89'
 # Now add all trackers and link a shape to it
 for i in range(0,24):
-	t = vrpn.addTracker('Tracker0@localhost', i)
+	t = vrpn.addTracker(trackerLocationA, i)
 	s = vizshape.addSphere(radius = 0.1)
 	l = viz.link(t,s)
 	trackers.append(t)
@@ -77,8 +78,6 @@ for i in range(0,24):
 		s.color(viz.BLUE)
 
 # Trackers for specified bodyparts
-trackerLocationA = 'Tracker0@10.10.33.167'
-trackerLocationB = 'Tracker0@10.10.34.89'
 RF = vrpn.addTracker(trackerLocationA, RIGHTFOOT)
 LF = vrpn.addTracker(trackerLocationA, LEFTFOOT)
 RK = vrpn.addTracker(trackerLocationA, RIGHTKNEE)
