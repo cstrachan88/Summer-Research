@@ -5,7 +5,6 @@ import math
 import datetime
 import Queue
 
-
 viz.go()#viz.PROMPT)
 
 
