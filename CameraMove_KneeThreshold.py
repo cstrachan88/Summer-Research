@@ -157,15 +157,13 @@ def checkStep():
 	
 	LKvert = (LK.getPosition())[1] - initialKnee
 	RKvert = (RK.getPosition())[1] - initialKnee
-#	print "LKvert: ", LKvert
-#	print "RKvert: ", LKvert
 
 	
 #	************************* Output to file ****************************	#
 	counter += 1
 	with open(filename, 'a') as f:
 		x,y,z = view.getPosition()
-		s = str(counter)+','+str(LKvert)+','+str(RKvert)+','+str(initialKnee)+','+str(stepCounter)+','+str(x)+','+str(y)+','+str(z)+'\n'
+		s = str(counter)+','+str(LKvert)+','+str(RKvert)+','+str(initialKnee)+','+str(stepCounter)+','+str(yaw)+','+str(aveYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
 		f.write(s)
 	f.closed
 #	************************** End of output ****************************	#
@@ -200,7 +198,7 @@ def getInitial():
 	initialKnee = ((LK.getPosition())[1] + (RK.getPosition())[1])/2
 	
 	with open(filename, 'w') as f:
-		f.write('runs of checkStep,LK Height Dif,RK Height Dif,initial Knee Height,Step Count,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
+		f.write('runs of checkStep,LK Height Dif,RK Height Dif,initial Knee Height,Step Count,MainView Yaw,MainView Yaw Averaged,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
 	f.closed
 
 def main():
