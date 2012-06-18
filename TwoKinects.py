@@ -1,3 +1,5 @@
+# Last Modified: 6/18/2012
+
 import viz
 import vizact
 import vizshape
@@ -12,7 +14,7 @@ viz.go()#viz.PROMPT)
 ''' *************************** Set Up Scene **************************** '''
 #ground = viz.add('tut_ground.wrl')
 #sky = viz.clearcolor(viz.SKYBLUE)
-#gallery = viz.addChild('gallery.osgb')
+gallery = viz.addChild('gallery.osgb')
 
 grid = vizshape.addGrid()
 ''' *********************** End of Scene set up ************************* '''
@@ -121,11 +123,15 @@ flag_clockwise = 0
 flag_side_cam = 0 #turn on when using side camera (B)
 YAW_SIZE = 10
 finalYaw = 0
+finalYaws = []
+aveFinalYaw = 0
 text1 = viz.addText("Start walking")
 
+mainYaw = 0
+output2file = 1
 now = datetime.datetime.now()
 counter = 0
-filename = 'Output files/output {}-{} {},{},{}.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
+filename = 'bin/Output files/output {}-{} {},{},{}.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
 ''' ********************* End of Initializations ************************ '''
 
 
@@ -147,36 +153,36 @@ def unitVector(x,y,z):
 	return x/vecMag, y/vecMag, z/vecMag
 
 
-def averageYaw():
-	global yaw, yawB, yaws, yawsB, aveYaw, aveYawB, YAW_SIZE
-	if len(yaws) > YAW_SIZE:
-		yaws.pop(0)		
+def averageYaw(currentYaw, yawList):
+	global YAW_SIZE
+	if len(yawList) > YAW_SIZE:
+		yawList.pop(0)		
 	
-	yaws.append(yaw)
-	aveYaw = sum(yaws) / len(yaws)	
+	yawList.append(currentYaw)
+	return sum(yawList) / len(yawList)	
 	
-	if len(yawsB) > YAW_SIZE:
-		yawsB.pop(0)		
-	
-	yawsB.append(yawB)
-	aveYawB = sum(yawsB) / len(yawsB)
+#	if len(yawsB) > YAW_SIZE:
+#		yawsB.pop(0)		
+#	
+#	yawsB.append(yawB)
+#	aveYawB = sum(yawsB) / len(yawsB)
 
 def yawOut(yaw):
-	return (yaw >= 45 and yaw <= -45)	
+	return (yaw >= 45 or yaw <= -45)	
 	
-def switchCam():
-	global flag_out, flag_outB, flag_side_cam
-	if flag_side_cam:
-		flag_side_cam = (not flag_outB) * flag_side_cam
-	else:
-		flag_side_cam = (not flag_out) * flag_side_cam		
+#def switchCam():
+#	global flag_out, flag_outB, flag_side_cam
+#	if flag_side_cam:
+#		flag_side_cam = (not flag_outB) and flag_side_cam
+#	else:
+#		flag_side_cam = (not flag_out) and flag_side_cam
 
-def turningDir(): # clockwise(1) or counterclockwise(0)
+def turningDir(): # returns clockwise(1) or counterclockwise(0)
 	global yaw, yawB, yaws, yawsB, flag_side_cam
 	if flag_side_cam:
-		return yawB > yawsB[len(yawsB) - 1]
+		return yawB > yawsB[len(yawsB) - 2]
 	else:
-		return yaw > yaws[len(yaws) - 1]
+		return yaw > yaws[len(yaws) - 2]
 
 def tranalateYaw():
 	global aveYaw, aveYawB, finalYaw, quadrant
@@ -188,13 +194,13 @@ def tranalateYaw():
 	elif quadrant == 2:
 		finalYaw = aveYaw + 180
 	else:
-		finalYaw - aveYawB - 90
+		finalYaw = aveYawB - 90
 
 
 def switchCam():
 	global quadrant, flag_clockwise, flag_side_cam
 	flag_side_cam = not flag_side_cam
-	quadrant = (quadrant - pow(-1, flag_clockwise)) % 4
+	quadrant = (quadrant - math.pow(-1, flag_clockwise)) % 4
 
 
 def step():
@@ -208,30 +214,29 @@ def step():
 
 
 def checkStep():
-	global yaw, yawB, yaws, yawsB, aveYaw, aveYawB, finalYaw
+	global yaw, yawB, yaws, yawsB, aveYaw, aveYawB, finalYaw, aveFinalYaw
 	global flag_out, flag_outB, flag_clockwise
-	global counter, YAW_SIZE
+	global counter, YAW_SIZE, output2file, mainYaw
 	
 	LFvert = (LF.getPosition())[1]
 	RFvert = (RF.getPosition())[1]
-
 	
 #	************************* Output to file ****************************	#
-	counter += 1
-	#if counter % 30 == 0:
-	with open(filename, 'a') as f:
-		x,y,z = viz.MainView.getPosition()
-		s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(yaw)+','+str(aveYaw)+','+str(yawB)+','+str(aveYawB)+','+str(finalYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
-		f.write(s)
-	f.closed
+	if (output2file):
+		counter += 1
+		#if counter % 30 == 0:
+		with open(filename, 'a') as f:
+			x,y,z = viz.MainView.getPosition()
+			s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(yaw)+','+str(aveYaw)+','+str(yawB)+','+str(aveYawB)+','+str(finalYaw)+','+str(quadrant)+','+str(flag_side_cam)+','+str(flag_clockwise)+','+str(aveFinalYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
+			f.write(s)
+		f.closed
 #	************************** End of output ****************************	#
-	
-
 
 	yaw = Torso.getEuler()[0]
 	yawB = TorsoB.getEuler()[0]
 	
-	averageYaw()
+	aveYaw = averageYaw(yaw, yaws)
+	aveYawB = averageYaw(yawB, yawsB)
 	flag_out = yawOut(yaw)
 	flag_outB = yawOut(yawB)
 	flag_clockwise = turningDir()
@@ -241,16 +246,17 @@ def checkStep():
 		switchCam()
 	
 	tranalateYaw()
-		
+	aveFinalYaw = averageYaw(finalYaw, finalYaws)
 	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep):
 		step()
 	
 	# Code for movement using torso yaw
-	x,y,z = unitVector(math.cos(math.radians(finalYaw+90)), 0, math.sin(math.radians(finalYaw+90)))
+	x,y,z = unitVector(math.cos(math.radians(aveFinalYaw+90)), 0, math.sin(math.radians(aveFinalYaw+90)))
 	x = x + viz.MainView.getPosition()[0]
 	z = z + viz.MainView.getPosition()[2]
 	viz.MainView.lookat([x,1.8,z])
 
+	mainYaw = viz.MainView.getEuler()[0]
 	# Code for movement using HMD
 	#data = tracker.getData()
 	#viz.MainView.setEuler(data[3], data[4], data[5])
@@ -258,24 +264,26 @@ def checkStep():
 
 
 def getInitial():
-	global initialStep
+	global initialStep, output2file
 	initialKnee = ((LK.getPosition())[1] + (RK.getPosition())[1])/2
 	initialFeet = ((LF.getPosition())[1] + (RF.getPosition())[1])/2
 	
-	initialStep = (initialKnee + initialFeet) * .68
+	initialStep = (initialFeet - initialKnee) * .65 + initialKnee
+	print initialFeet, initialKnee, initialStep
 	
-	with open(filename, 'w') as f:
-		f.write('runs of checkStep,LF Height,RF Height,Step Threshold,yawA,yawAave,yawB,yawBave,finalYaw,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
-	f.closed
+	if (output2file):	
+		with open(filename, 'w') as f:
+			f.write('runs of checkStep,LF Height,RF Height,Step Threshold,yawA,yawAave,yawB,yawBave,finalYaw,Quadrant,Side Camera On,Clockwise,AveFinalYaw,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
+		f.closed
 
 
 
 def main():
 	global initialStep
 #	if initialStep:
-#		time.sleep(1.5)
-	text1.setPosition(-2.5,1.6,10)
-	print "started"
+	time.sleep(3)
+	text1.setPosition(0,1.6,4)
+	print "START"
 	vizact.ontimer2(0.33, 2, getInitial)
 	vizact.ontimer(1/60, checkStep)
 	
