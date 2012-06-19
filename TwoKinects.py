@@ -190,17 +190,17 @@ def tranalateYaw():
 	if quadrant == 0:
 		finalYaw = aveYaw
 	elif quadrant == 1:
-		finalYaw = aveYawB + 90
+		finalYaw = aveYawB - 90
 	elif quadrant == 2:
 		finalYaw = aveYaw + 180
 	else:
-		finalYaw = aveYawB - 90
+		finalYaw = aveYawB + 90
 
 
 def switchCam():
 	global quadrant, flag_clockwise, flag_side_cam
 	flag_side_cam = not flag_side_cam
-	quadrant = (quadrant - math.pow(-1, flag_clockwise)) % 4
+	quadrant = (quadrant + math.pow(-1, flag_clockwise)) % 4
 
 
 def step():
