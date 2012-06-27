@@ -12,7 +12,7 @@ import time
 
 
 viz.go(viz.PROMPT)
-viz.collision(viz.OFF)
+viz.collision(viz.ON)
 
 
 ''' *************************** KINECT CODE ***************************** '''
@@ -101,8 +101,7 @@ tracker = viz.add('intersense.dls')
 #viz.translate(viz.HEAD_POS,0,-1.8,0)
 #viz.eyeheight(1.8);
 
-viz.MainView.setPosition(0,1.5,1)
-viz.MainView.lookat([1,1.8,1])
+viz.MainView.setPosition(0,1.8,-3)
 view = viz.MainView
 prevStep = "DOWN"
 initialStep = 0
@@ -118,13 +117,12 @@ flag_out = 0 # turn on when camera A can't detect yaw
 flag_outB = 0 #turn on when camera B can't detect yaw
 flag_clockwise = 0
 flag_side_cam = 0 #turn on when using side camera (B)
-YAW_SIZE = 20
+YAW_SIZE = 10
 finalYaw = 0
 finalYaws = []
 aveFinalYaw = 0
 text1 = viz.addText("Start walking")
 
-stepCount = 0
 mainYaw = 0
 output2file = 0
 now = datetime.datetime.now()
@@ -191,13 +189,12 @@ def switchCam():
 
 
 def step():
-	global prevStep, stepCount
+	global prevStep
 	prevStep = "UP"
 	
 	x,y,z = unitVector(math.cos(math.radians(aveYaw+90)), 0, math.sin(math.radians(aveYaw+90)))
 	viz.MainView.velocity(x, y, z)
-	stepCount += 1
-	print stepCount
+	
 	vizact.ontimer2(.9,0,setDown)
 
 
@@ -208,15 +205,11 @@ def checkStep():
 	
 	LFvert = (LF.getPosition())[1]
 	RFvert = (RF.getPosition())[1]
-	LFvertB = (LFb.getPosition())[1]
-	RFvertB = (RF.getPosition())[1]
 	
 #	************************* Output to file ****************************	#
 #	if (output2file):
-#	counter += 1
-#	if counter % 30 == 0:
-#		print "Knee", LK.getPosition()[1], RK.getPosition()[1]
-#		print "Feet", LF.getPosition()[1],RF.getPosition()[1]
+#		counter += 1
+#		#if counter % 30 == 0:
 #		with open(filename, 'a') as f:
 #			x,y,z = viz.MainView.getPosition()
 #			s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(yaw)+','+str(aveYaw)+','+str(yawB)+','+str(aveYawB)+','+str(finalYaw)+','+str(quadrant)+','+str(flag_side_cam)+','+str(flag_clockwise)+','+str(aveFinalYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
@@ -239,7 +232,7 @@ def checkStep():
 	
 	tranalateYaw()
 	aveFinalYaw = averageYaw(finalYaw, finalYaws)
-	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep) and (LFvertB > initialStep or RFvertB > initialStep):
+	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep):
 		step()
 	
 	# Code for movement using torso yaw
@@ -260,7 +253,7 @@ def getInitial():
 	initialKnee = ((LK.getPosition())[1] + (RK.getPosition())[1])/2
 	initialFeet = ((LF.getPosition())[1] + (RF.getPosition())[1])/2
 	
-	initialStep = (initialFeet - initialKnee) * .5 + initialKnee
+	initialStep = (initialFeet - initialKnee) * .65 + initialKnee
 	print initialFeet, initialKnee, initialStep
 	
 #	if (output2file):	
@@ -399,5 +392,5 @@ time.sleep(3)
 text1.setPosition(0,1.6,4)
 print "START"
 vizact.ontimer2(0.33, 2, getInitial)
-vizact.ontimer(1/30, checkStep)	
+vizact.ontimer(1/60, checkStep)	
 viz.callback(viz.KEYBOARD_EVENT, keyEvent)
