@@ -152,19 +152,25 @@ def unitVector(x,y,z):
 	return x/vecMag, y/vecMag, z/vecMag
 
 
-def averageYaw(currentYaw, yawList):
+def averageYaw(currentYaw, yawList, final):
 	global YAW_SIZE, loopCount
 	if len(yawList) > YAW_SIZE:
 		yawList.pop(0)
-	if len(yawList) >= 2 and abs(currentYaw - yawList[len(yawList) - 1]) > 180:
+	if final:
 			
-		if (currentYaw) <= 10 and (yawList[len(yawList) - 1] % 360) > 340:
-			loopCount += 1
+		if len(yawList) >= 2 and abs(currentYaw - yawList[len(yawList) - 1]) > 180:
+				
+			if (currentYaw) <= 10 and currentYaw >= 0 and (yawList[len(yawList) - 1] % 360) > 350:
+				loopCount += 1
+			
+			if (currentYaw % 360) > 350 and (yawList[len(yawList) - 1] %360)  <= 10 and (yawList[len(yawList) - 1] %360)  >= 0 :
+				loopCount -= 1
+				
+		yawList.append(currentYaw + loopCount * 360)
+	else:
 		
-		if (currentYaw) > 350 and (yawList[len(yawList) - 1] %360)  <= 20:
-			loopCount -= 1
-			
-	yawList.append(currentYaw  + loopCount * 360)
+		yawList.append(currentYaw)
+	
 	return sum(yawList) / len(yawList)	
 
 
@@ -176,9 +182,9 @@ def yawOut(yaw):
 def turningDir(): # returns clockwise(1) or counterclockwise(0)
 	global yaw, yawB, yaws, yawsB, flag_side_cam
 	if flag_side_cam:
-		return yawB < yawsB[len(yawsB) - 2] - loopCount * 360
+		return yawB < yawsB[len(yawsB) - 2]
 	else:
-		return yaw < yaws[len(yaws) - 2] - loopCount * 360
+		return yaw < yaws[len(yaws) - 2]
 
 def translateYaw():
 	global aveYaw, aveYawB, finalYaw, quadrant
@@ -236,8 +242,8 @@ def checkStep():
 	yaw = Torso.getEuler()[0] % 360
 	yawB = TorsoB.getEuler()[0] % 360
 	
-	aveYaw = averageYaw(yaw, yaws)
-	aveYawB = averageYaw(yawB, yawsB)
+	aveYaw = averageYaw(yaw, yaws, False)
+	aveYawB = averageYaw(yawB, yawsB, False)
 	#print "Averages:"
 	#print aveYaw, aveYawB
 	
@@ -249,10 +255,10 @@ def checkStep():
 	if ((flag_out, flag_outB)[flag_side_cam]):
 		switchCam()
 		
-	#print flag_clockwise
+	print flag_clockwise
 	
 	translateYaw()
-	aveFinalYaw = averageYaw(finalYaw, finalYaws)
+	aveFinalYaw = averageYaw(finalYaw, finalYaws, True)
 	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep) and (LFvertB > initialStep or RFvertB > initialStep):
 		step()
 	print aveFinalYaw, finalYaw
