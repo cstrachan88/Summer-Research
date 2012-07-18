@@ -1,88 +1,86 @@
-InterSense Library ver. 4.04 32-bit
-Copyright 1998-2007 InterSense Inc.
+InterSense Library ver. 4.2110 32-bit
+Copyright 1998-2010 InterSense Inc.
 http://www.intersense.com
 Tel: 781-541-6330
 
+Mon Jul 09 09:37:13 2012
 Looking for InterSense tracking device number 1. 
 Please wait 
-Invalid Handle (\\?\hid#vid_046d&pid_c063#6&37a7ddf&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030})
-Invalid Handle (\\?\hid#vid_413c&pid_2011&mi_00#8&7eec7f4&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030})
-Invalid Handle (\\?\hid#vid_413c&pid_2011&mi_01&col01#8&1be875ce&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030})
-(iHid) hidOpenDevice. VendorID: 16700; ProductID: 8209
-(iHid) hidOpenDevice. VendorID: 16700, closing handle
-Invalid Handle (\\?\hid#vid_413c&pid_2011&mi_01&col03#8&1be875ce&0&0002#{4d1e55b2-f16f-11cf-88cb-001111000030})
-Looking for IS-X00 device on port 1 (0.03)
-...Looking for InterTrax on port 1 (0.40)
-InterTrax: Failed to reset
-Looking for IS-X00 device on port 2 (2.66)
+Invalid Handle (\\?\hid#vid_046d&pid_c016#7&1f13da59&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030})
+Invalid Handle (\\?\hid#vid_413c&pid_2011&mi_00#8&39012e7d&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030})
+Invalid Handle (\\?\hid#vid_413c&pid_2011&mi_01&col01#8&213da238&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030})
+Invalid Handle (\\?\hid#vid_413c&pid_2011&mi_01&col03#8&213da238&0&0002#{4d1e55b2-f16f-11cf-88cb-001111000030})
+Looking for IS-X00 device on port 1 (0.05)
+Looking for IS-X00 device on port 2 (0.18)
 Failed to open \\.\COM2 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 3 (2.67)
-Failed to open \\.\COM3 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 4 (2.67)
+Looking for IS-X00 device on port 3 (0.19)
+Looking for IS-X00 device on port 4 (0.37)
 Failed to open \\.\COM4 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 5 (2.67)
+Looking for IS-X00 device on port 5 (0.37)
 Failed to open \\.\COM5 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 6 (2.68)
+Looking for IS-X00 device on port 6 (0.37)
 Failed to open \\.\COM6 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 7 (2.68)
+Looking for IS-X00 device on port 7 (0.38)
 Failed to open \\.\COM7 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 8 (2.68)
+Looking for IS-X00 device on port 8 (0.38)
 Failed to open \\.\COM8 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 9 (2.68)
+Looking for IS-X00 device on port 9 (0.38)
 Failed to open \\.\COM9 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 10 (2.69)
+Looking for IS-X00 device on port 10 (0.38)
 Failed to open \\.\COM10 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 11 (2.69)
+Looking for IS-X00 device on port 11 (0.39)
 Failed to open \\.\COM11 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 12 (2.69)
+Looking for IS-X00 device on port 12 (0.39)
 Failed to open \\.\COM12 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 13 (2.69)
+Looking for IS-X00 device on port 13 (0.39)
 Failed to open \\.\COM13 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 14 (2.70)
+Looking for IS-X00 device on port 14 (0.40)
 Failed to open \\.\COM14 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 15 (2.70)
+Looking for IS-X00 device on port 15 (0.40)
 Failed to open \\.\COM15 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 16 (2.70)
+Looking for IS-X00 device on port 16 (0.40)
 Failed to open \\.\COM16 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 17 (2.71)
+Looking for IS-X00 device on port 17 (0.41)
 Failed to open \\.\COM17 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 18 (2.71)
+Looking for IS-X00 device on port 18 (0.41)
 Failed to open \\.\COM18 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 19 (2.71)
+Looking for IS-X00 device on port 19 (0.41)
 Failed to open \\.\COM19 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 20 (2.71)
+Looking for IS-X00 device on port 20 (0.41)
 Failed to open \\.\COM20 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 21 (2.72)
+Looking for IS-X00 device on port 21 (0.42)
 Failed to open \\.\COM21 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 22 (2.72)
+Looking for IS-X00 device on port 22 (0.42)
 Failed to open \\.\COM22 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 23 (2.72)
+Looking for IS-X00 device on port 23 (0.42)
 Failed to open \\.\COM23 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 24 (2.73)
+Looking for IS-X00 device on port 24 (0.42)
 Failed to open \\.\COM24 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 25 (2.73)
+Looking for IS-X00 device on port 25 (0.43)
 Failed to open \\.\COM25 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 26 (2.73)
+Looking for IS-X00 device on port 26 (0.43)
 Failed to open \\.\COM26 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 27 (2.74)
+Looking for IS-X00 device on port 27 (0.43)
 Failed to open \\.\COM27 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 28 (2.74)
+Looking for IS-X00 device on port 28 (0.44)
 Failed to open \\.\COM28 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 29 (2.75)
+Looking for IS-X00 device on port 29 (0.44)
 Failed to open \\.\COM29 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 30 (2.75)
+Looking for IS-X00 device on port 30 (0.44)
 Failed to open \\.\COM30 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 31 (2.75)
+Looking for IS-X00 device on port 31 (0.44)
 Failed to open \\.\COM31 (The system cannot find the file specified.)
-Looking for IS-X00 device on port 32 (2.76)
+Looking for IS-X00 device on port 32 (0.45)
 Failed to open \\.\COM32 (The system cannot find the file specified.)
 
-Looking for SDP devices (2.76)
+Looking for SDP devices (0.45)
 DEVWRN: Device config file not found: isradio.ini
 No HID devices connected
 Failed to set control word on \\.\COM1 (The parameter is incorrect.)
+Failed to set control word on \\.\COM1 (The parameter is incorrect.)
 Failed to open \\.\COM2 (The system cannot find the file specified.)
-Failed to open \\.\COM3 (The system cannot find the file specified.)
+Failed to set control word on \\.\COM3 (The parameter is incorrect.)
+Failed to set control word on \\.\COM3 (The parameter is incorrect.)
 Failed to open \\.\COM4 (The system cannot find the file specified.)
 Failed to open \\.\COM5 (The system cannot find the file specified.)
 Failed to open \\.\COM6 (The system cannot find the file specified.)
@@ -113,11 +111,20 @@ Failed to open \\.\COM30 (The system cannot find the file specified.)
 Failed to open \\.\COM31 (The system cannot find the file specified.)
 Failed to open \\.\COM32 (The system cannot find the file specified.)
 DEVWRN: SDP initialization failed
+DEVMSG: Failed to set device configuration
+ERROR: Interface initialization failed
 
-No SDP Deviced found (3.19)
+No SDP Deviced found (1.76)
 
 Looking for UDP Broadcasts
+  Checking UDP port 5001... NOT FOUND
+  Checking UDP port 5002... NOT FOUND
+  Checking UDP port 5003... NOT FOUND
+  Checking UDP port 5004... SOCKET INIT ERROR
+  Checking UDP port 5004... NOT FOUND
+  Checking UDP port 5005... SOCKET INIT ERROR
+  Checking UDP port 5005... NOT FOUND
 
 InterSense tracker not present
-Finished (4.24)
+Finished (2.41)
 Dll Unloaded, cleaning up.

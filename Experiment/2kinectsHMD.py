@@ -102,12 +102,11 @@ tracker = viz.add('intersense.dls')
 #viz.eyeheight(1.8);
 
 viz.MainView.setPosition(0,1.5,1)
-viz.MainView.lookat([1,1.5,1])
+viz.MainView.lookat([1,1.8,1])
 view = viz.MainView
 prevStep = "DOWN"
 initialStep = 0
 
-loopCount = 0
 yaw = 0
 yawB = 0
 yaws = []
@@ -127,10 +126,10 @@ text1 = viz.addText("Start walking")
 
 stepCount = 0
 mainYaw = 0
-output2file = 0
+output2file = 1
 now = datetime.datetime.now()
 counter = 0
-#filename = 'bin/Output files/output {}-{} {},{},{}.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
+filename = '../bin/Output files/output {}-{} {},{},{}.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
 ''' ********************* End of Initializations ************************ '''
 
 
@@ -152,41 +151,27 @@ def unitVector(x,y,z):
 	return x/vecMag, y/vecMag, z/vecMag
 
 
-def averageYaw(currentYaw, yawList, final):
-	global YAW_SIZE, loopCount
+def averageYaw(currentYaw, yawList):
+	global YAW_SIZE
 	if len(yawList) > YAW_SIZE:
-		yawList.pop(0)
-	if final:
-			
-		if len(yawList) >= 2 and abs(currentYaw - yawList[len(yawList) - 1]) > 180:
-				
-			if (currentYaw) <= 10 and currentYaw >= 0 and (yawList[len(yawList) - 1] % 360) > 350:
-				loopCount += 1
-			
-			if (currentYaw % 360) > 350 and (yawList[len(yawList) - 1] %360)  <= 10 and (yawList[len(yawList) - 1] %360)  >= 0 :
-				loopCount -= 1
-				
-		yawList.append(currentYaw + loopCount * 360)
-	else:
-		
-		yawList.append(currentYaw)
+		yawList.pop(0)		
 	
+	yawList.append(currentYaw)
 	return sum(yawList) / len(yawList)	
 
 
 def yawOut(yaw):
-	angle = yaw % 360
-	return (angle >= 45 and angle <= 315 )	
+	return (yaw >= 45 or yaw <= -45)	
 	
 
 def turningDir(): # returns clockwise(1) or counterclockwise(0)
 	global yaw, yawB, yaws, yawsB, flag_side_cam
 	if flag_side_cam:
-		return yawB < yawsB[len(yawsB) - 2]
+		return yawB > yawsB[len(yawsB) - 2]
 	else:
-		return yaw < yaws[len(yaws) - 2]
+		return yaw > yaws[len(yaws) - 2]
 
-def translateYaw():
+def tranalateYaw():
 	global aveYaw, aveYawB, finalYaw, quadrant
 	
 	if quadrant == 0:
@@ -194,11 +179,11 @@ def translateYaw():
 	elif quadrant == 1:
 		finalYaw = aveYawB - 90
 	elif quadrant == 2:
-		finalYaw = aveYaw + 180
+		finalYaw = aveYaw - 180
 	else:
 		finalYaw = aveYawB + 90
-	
-	
+
+
 def switchCam():
 	global quadrant, flag_clockwise, flag_side_cam
 	flag_side_cam = not flag_side_cam
@@ -227,26 +212,23 @@ def checkStep():
 	RFvertB = (RF.getPosition())[1]
 	
 #	************************* Output to file ****************************	#
-#	if (output2file):
-#	counter += 1
+	if (output2file):
+		counter += 1
 #	if counter % 30 == 0:
-#		print "Knee", LK.getPosition()[1], RK.getPosition()[1]
-#		print "Feet", LF.getPosition()[1],RF.getPosition()[1]
-#		with open(filename, 'a') as f:
-#			x,y,z = viz.MainView.getPosition()
-#			s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(yaw)+','+str(aveYaw)+','+str(yawB)+','+str(aveYawB)+','+str(finalYaw)+','+str(quadrant)+','+str(flag_side_cam)+','+str(flag_clockwise)+','+str(aveFinalYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
-#			f.write(s)
-#		f.closed
+		print "Knee", LK.getPosition()[1], RK.getPosition()[1]
+		print "Feet", LF.getPosition()[1],RF.getPosition()[1]
+		with open(filename, 'a') as f:
+			x,y,z = viz.MainView.getPosition()
+			s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(yaw)+','+str(aveYaw)+','+str(yawB)+','+str(aveYawB)+','+str(finalYaw)+','+str(quadrant)+','+str(flag_side_cam)+','+str(flag_clockwise)+','+str(aveFinalYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
+			f.write(s)
+		f.closed
 #	************************** End of output ****************************	#
 
-	yaw = Torso.getEuler()[0] % 360
-	yawB = TorsoB.getEuler()[0] % 360
+	yaw = Torso.getEuler()[0]
+	yawB = TorsoB.getEuler()[0]
 	
-	aveYaw = averageYaw(yaw, yaws, False)
-	aveYawB = averageYaw(yawB, yawsB, False)
-	#print "Averages:"
-	#print aveYaw, aveYawB
-	
+	aveYaw = averageYaw(yaw, yaws)
+	aveYawB = averageYaw(yawB, yawsB)
 	flag_out = yawOut(yaw)
 	flag_outB = yawOut(yawB)
 	flag_clockwise = turningDir()
@@ -254,21 +236,20 @@ def checkStep():
 	# evaluate flag_outB if flag_side_cam is turned on
 	if ((flag_out, flag_outB)[flag_side_cam]):
 		switchCam()
-		
-	print flag_clockwise
 	
-	translateYaw()
-	aveFinalYaw = averageYaw(finalYaw, finalYaws, True)
+	tranalateYaw()
+	aveFinalYaw = averageYaw(finalYaw, finalYaws)
 	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep) and (LFvertB > initialStep or RFvertB > initialStep):
 		step()
-	print aveFinalYaw, finalYaw
+	
 	# Code for movement using torso yaw
 	x,y,z = unitVector(math.cos(math.radians(aveFinalYaw+90)), 0, math.sin(math.radians(aveFinalYaw+90)))
 	x = x + viz.MainView.getPosition()[0]
 	z = z + viz.MainView.getPosition()[2]
-	viz.MainView.lookat([x,1.5,z])
-	
-	#don't ever use this
+#	viz.MainView.lookat([x,1.8,z])
+	viz.MainView.setEuler(90-aveFinalYaw, viz.MainView.getEuler()[1],viz.MainView.getEuler()[2])
+
+
 	mainYaw = viz.MainView.getEuler()[0]
 	# Code for movement using HMD
 	data = tracker.getData()
@@ -284,10 +265,10 @@ def getInitial():
 	initialStep = (initialFeet - initialKnee) * .5 + initialKnee
 	print initialFeet, initialKnee, initialStep
 	
-#	if (output2file):	
-#		with open(filename, 'w') as f:
-#			f.write('runs of checkStep,LF Height,RF Height,Step Threshold,yawA,yawAave,yawB,yawBave,finalYaw,Quadrant,Side Camera On,Clockwise,AveFinalYaw,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
-#		f.closed
+	if (output2file):	
+		with open(filename, 'w') as f:
+			f.write('runs of checkStep,LF Height,RF Height,Step Threshold,yawA,yawAave,yawB,yawBave,finalYaw,Quadrant,Side Camera On,Clockwise,AveFinalYaw,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
+		f.closed
 
 
 
@@ -417,8 +398,8 @@ def keyEvent(key):
 #global initialStep
 #	if initialStep:
 time.sleep(3)
-#text1.setPosition(0,1.6,4)
+text1.setPosition(0,1.6,4)
 print "START"
-vizact.ontimer2(0.33, 0, getInitial)
+vizact.ontimer2(0.33, 2, getInitial)
 vizact.ontimer(1/30, checkStep)	
 viz.callback(viz.KEYBOARD_EVENT, keyEvent)

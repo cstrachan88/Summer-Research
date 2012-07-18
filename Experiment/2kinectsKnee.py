@@ -1,18 +1,22 @@
 import viz
-import viztask
-import vizjoy
-import math
-import random
-import time
-import vizshape
 import vizact
+import vizshape
+import math
 import datetime
 import time
-#import Queue
+import Queue
 
 
-viz.go(viz.PROMPT)
-viz.collision(viz.ON)
+viz.go()#viz.PROMPT)
+
+
+''' *************************** Set Up Scene **************************** '''
+#ground = viz.add('tut_ground.wrl')
+#sky = viz.clearcolor(viz.SKYBLUE)
+#gallery = viz.addChild('gallery.osgb')
+
+grid = vizshape.addGrid()
+''' *********************** End of Scene set up ************************* '''
 
 
 ''' *************************** KINECT CODE ***************************** '''
@@ -49,11 +53,12 @@ shapes = []
 
 # Start vrpn
 vrpn = viz.addExtension('vrpn7.dle')
-trackerLocationA = 'Tracker0@10.10.33.167'
-trackerLocationB = 'Tracker0@10.10.34.89'
+
+trackerLocation = 'Tracker0@10.10.34.89'
+
 # Now add all trackers and link a shape to it
 for i in range(0,24):
-	t = vrpn.addTracker(trackerLocationA, i)
+	t = vrpn.addTracker(trackerLocation, i)
 	s = vizshape.addSphere(radius = 0.1)
 	l = viz.link(t,s)
 	trackers.append(t)
@@ -75,73 +80,52 @@ for i in range(0,24):
 		s.color(viz.BLUE)
 
 # Trackers for specified bodyparts
-RF = vrpn.addTracker(trackerLocationA, RIGHTFOOT)
-LF = vrpn.addTracker(trackerLocationA, LEFTFOOT)
-RK = vrpn.addTracker(trackerLocationA, RIGHTKNEE)
-LK = vrpn.addTracker(trackerLocationA, LEFTKNEE)
-RH = vrpn.addTracker(trackerLocationA, RIGHTHIP)
-LH = vrpn.addTracker(trackerLocationA, LEFTHIP)
-RS = vrpn.addTracker(trackerLocationA, RIGHTSHOULDER)
-LS = vrpn.addTracker(trackerLocationA, LEFTSHOULDER)
-Torso = vrpn.addTracker(trackerLocationA, TORSO)
-TorsoB = vrpn.addTracker(trackerLocationB, TORSO)
-RFb = vrpn.addTracker(trackerLocationB, RIGHTFOOT)
-LFb = vrpn.addTracker(trackerLocationB, LEFTFOOT)
-RKb = vrpn.addTracker(trackerLocationB, RIGHTKNEE)
-LKb = vrpn.addTracker(trackerLocationB, LEFTKNEE)
-RHb = vrpn.addTracker(trackerLocationB, RIGHTHIP)
-LHb = vrpn.addTracker(trackerLocationB, LEFTHIP)
-RSb = vrpn.addTracker(trackerLocationB, RIGHTSHOULDER)
-LSb = vrpn.addTracker(trackerLocationB, LEFTSHOULDER)
+RF = vrpn.addTracker(trackerLocation, RIGHTFOOT)
+LF = vrpn.addTracker(trackerLocation, LEFTFOOT)
+RK = vrpn.addTracker(trackerLocation, RIGHTKNEE)
+LK = vrpn.addTracker(trackerLocation, LEFTKNEE)
+RH = vrpn.addTracker(trackerLocation, RIGHTHIP)
+LH = vrpn.addTracker(trackerLocation, LEFTHIP)
+RS = vrpn.addTracker(trackerLocation, RIGHTSHOULDER)
+LS = vrpn.addTracker(trackerLocation, LEFTSHOULDER)
+Torso = vrpn.addTracker(trackerLocation, TORSO)
 ''' ************************ End of KINECT CODE ************************* '''
 
 
 ''' ************************* Initializations *************************** '''
-tracker = viz.add('intersense.dls')
+#tracker = viz.add('intersense.dls')
 #viz.translate(viz.HEAD_POS,0,-1.8,0)
 #viz.eyeheight(1.8);
+initialKnee = 0
+LKvert = 0
+RKvert = 0
+#data = 0
+#timeElapsed = 0
+stepCounter = 0
+threshold = .1
+text1 = viz.addText("Stand still")
+#stepTimeDif = 0
+view = viz.get(viz.MAIN_VIEWPOINT)
 
-viz.MainView.setPosition(0,1.5,1)
-viz.MainView.lookat([1,1.5,1])
-view = viz.MainView
+view.setPosition(0,1.8,-3)
 prevStep = "DOWN"
 initialStep = 0
-
+checkYaw = 0
 yaw = 0
-yawB = 0
 yaws = []
-yawsB = []
 aveYaw = 0
-aveYawB = 0
-yawPrev = 0
-yawPrevB = 0
-DiffYaw = 0
-DiffYawB = 0
-
-quadrant = 0 # 0,1,2,3
-flag_out = 0 # turn on when camera A can't detect yaw
-flag_outB = 0 #turn on when camera B can't detect yaw
-flag_clockwise = 0
-flag_side_cam = 0 #turn on when using side camera (B)
 YAW_SIZE = 10
-finalYaw = 0
-finalYawPrev = 0
-finalYaws = []
-aveFinalYaw = 0
-text1 = viz.addText("Start walking")
 
-mainYaw = 0
-output2file = 1
 now = datetime.datetime.now()
 counter = 0
-filename = '../bin/Output files/output {}-{} {},{},{}.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
+filename = '../Output files/output {}-{} {}h{}m{}s.csv'.format(now.month,now.day,now.hour,now.minute,now.second)
 ''' ********************* End of Initializations ************************ '''
 
 
 def setDown():
 	global prevStep
 	prevStep = "DOWN"
-	viz.MainView.velocity(0,0,0)
+	view.velocity(0,0,0)
 
 
 def crossProduct(a,b):
@@ -156,145 +140,66 @@ def unitVector(x,y,z):
 	return x/vecMag, y/vecMag, z/vecMag
 
 
-def averageYaw(currentYaw, yawList):
-	global YAW_SIZE
-	if len(yawList) > YAW_SIZE:
-		yawList.pop(0)		
-	
-	yawList.append(currentYaw)
-	return sum(yawList) / len(yawList)	
-
-
-def yawOut(yaw):
-	return (yaw >= 45 or yaw <= -45)	
-	
-
-def turningDir(): # returns clockwise(1) or counterclockwise(0)
-	global yaw, yawB, yaws, yawsB, flag_side_cam, aveYaw, aveYawB
-	if flag_side_cam:
-		return yawB < aveYawB
-	else:
-		return yaw < aveYaw
-
-def tranalateYaw():
-	global aveYaw, aveYawB, finalYaw, quadrant, DiffYaw, DiffYawB
-	
-	if DiffYaw > 20:
-		DiffYaw = 0
-		
-	if DiffYawB > 20:
-		DiffYawB = 0
-	
-	if quadrant % 2 == 0:
-		finalYaw = finalYaw + DiffYaw
-	else:
-		finalYaw = finalYaw + DiffYawB
-
-
-def switchCam():
-	global quadrant, flag_clockwise, flag_side_cam
-	flag_side_cam = not flag_side_cam
-	quadrant = (quadrant + math.pow(-1, flag_clockwise)) % 4
-
-
 def step():
-	global prevStep
+	global prevStep, stepCounter
 	prevStep = "UP"
 	
 	x,y,z = unitVector(math.cos(math.radians(aveYaw+90)), 0, math.sin(math.radians(aveYaw+90)))
-	viz.MainView.velocity(x, y, z)
+	view.velocity(x, y, z)
 	
+	stepCounter += 1
+	print stepCounter
 	vizact.ontimer2(.9,0,setDown)
 
 
 def checkStep():
-	global yaw, yawB, yaws, yawsB, aveYaw, aveYawB, finalYaw, aveFinalYaw, finalYawPrev, DiffYaw, DiffYawB
-	global flag_out, flag_outB, flag_clockwise
-	global counter, YAW_SIZE, output2file, mainYaw
+	global checkYaw, yaw, counter, yaws, aveYaw, YAW_SIZE, initialKnee, stepCounter
 	
-	LFvert = (LF.getPosition())[1]
-	RFvert = (RF.getPosition())[1]
-	
-	LFvertB = (LFb.getPosition())[1]
-	RFvertB = (RFb.getPosition())[1]
+	LKvert = (LK.getPosition())[1] - initialKnee
+	RKvert = (RK.getPosition())[1] - initialKnee
+
 	
 #	************************* Output to file ****************************	#
-	if (output2file):
-		counter += 1
-		#if counter % 30 == 0:
-		with open(filename, 'a') as f:
-			x,y,z = viz.MainView.getPosition()
-			s = str(counter)+','+str(LFvert)+','+str(RFvert)+','+str(initialStep)+','+str(yaw)+','+str(aveYaw)+','+str(yawB)+','+str(aveYawB)+','+str(finalYaw)+','+str(quadrant)+','+str(flag_side_cam)+','+str(flag_clockwise)+','+str(aveFinalYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
-			f.write(s)
-		f.closed
-#	**************************	 End of output ****************************	#
+	counter += 1
+	with open(filename, 'a') as f:
+		x,y,z = view.getPosition()
+		s = str(counter)+','+str(LKvert)+','+str(RKvert)+','+str(initialKnee)+','+str(stepCounter)+','+str(yaw)+','+str(aveYaw)+','+str(x)+','+str(y)+','+str(z)+'\n'
+		f.write(s)
+	f.closed
+#	************************** End of output ****************************	#
 	
-	yawPrev = yaw
-	yawPrevB = yawB
-
-	yaw = Torso.getEuler()[0]
-	yawB = TorsoB.getEuler()[0]
+	# Code for averaging previous <YAW_SIZE> yaws
+	checkYaw = yaw
+	yaw = Torso.getEuler()[0]	
+	if len(yaws) > YAW_SIZE:
+		yaws.pop(0)		
+	yaws.append(yaw)
+	aveYaw = sum(yaws) / len(yaws)
+#	print aveYaw
 	
-	DiffYaw = yaw - yawPrev
-	DiffYawB = yawB - yawPrevB
-	
-	aveYaw = averageYaw(yaw, yaws)
-	aveYawB = averageYaw(yawB, yawsB)
-	flag_out = yawOut(yaw)
-	flag_outB = yawOut(yawB)
-	
-#	if flag_side_cam:
-#		flag_clockwise = DiffYaw < 0 
-#	else:
-#		flag_clockwise = DiffYawB < 0
-	flag_clockwise = turningDir()
-
-	# evaluate flag_outB if flag_side_cam is turned on
-	if ((flag_out, flag_outB)[flag_side_cam]):
-		switchCam()
-	
-	# Step Detection
-	if prevStep == "DOWN" and (LFvert > initialStep or RFvert > initialStep) and (LFvertB > initialStep or RFvertB > initialStep):
+		
+	if prevStep == "DOWN" and (LKvert > threshold or RKvert > threshold):
 		step()
 	
-	# Calculating final Yaw
-	finalYawPrev = finalYaw
-	tranalateYaw()
-#	finalYawDiff = finalYaw - finalYawPrev
-#	if abs(finalYawDiff) > 20:
-#		finalYawDiff = 0
-#	finalYaw = finalYaw - finalYawDiff
-
-	aveFinalYaw = averageYaw(finalYaw, finalYaws)
 	# Code for movement using torso yaw
-	x,y,z = unitVector(math.cos(math.radians(aveFinalYaw+90)), 0, math.sin(math.radians(aveFinalYaw+90)))
-	x = x + viz.MainView.getPosition()[0]
-	z = z + viz.MainView.getPosition()[2]
-#	viz.MainView.lookat([x,1.8,z])
-	viz.MainView.setEuler(-finalYaw, viz.MainView.getEuler()[1],viz.MainView.getEuler()[2])
+	x,y,z = unitVector(math.cos(math.radians(aveYaw+90)), 0, math.sin(math.radians(aveYaw+90)))
+	x = x + view.getPosition()[0]
+	z = z + view.getPosition()[2]
+	view.lookat([x,1.8,z])
 
-
-	mainYaw = viz.MainView.getEuler()[0]
 	# Code for movement using HMD
-#	data = tracker.getData()
-#	#viz.MainView.setEuler(data[3], data[4], data[5])
-#	#viz.MainView.rotate(data[3]+90,data[4],data[5],'',viz.BODY_ORI)
+	#data = tracker.getData()
+	#view.setEuler(data[3], data[4], data[5])
+	#view.rotate(data[3]+90,data[4],data[5],'',viz.BODY_ORI)
 
 
 def getInitial():
-	global initialStep, output2file
+	global initialKnee
 	initialKnee = ((LK.getPosition())[1] + (RK.getPosition())[1])/2
-	initialFeet = ((LF.getPosition())[1] + (RF.getPosition())[1])/2
 	
-	initialStep = (initialFeet - initialKnee) * .65 + initialKnee
-	print initialFeet, initialKnee, initialStep
-	
-	if (output2file):	
-		with open(filename, 'w') as f:
-			f.write('runs of checkStep,LF Height,RF Height,Step Threshold,yawA,yawAave,yawB,yawBave,finalYaw,Quadrant,Side Camera On,Clockwise,AveFinalYaw,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
-		f.closed
-
-
+	with open(filename, 'w') as f:
+		f.write('runs of checkStep,LK Height Dif,RK Height Dif,initial Knee Height,Step Count,MainView Yaw,MainView Yaw Averaged,Mainview Xpos,Mainview Ypos,Mainview Zpos\n')
+	f.closed
 
 
 #Load the room envirnoment
@@ -425,5 +330,5 @@ time.sleep(3)
 text1.setPosition(0,1.6,4)
 print "START"
 vizact.ontimer2(0.33, 2, getInitial)
-vizact.ontimer(1/60, checkStep)	
+vizact.ontimer(1/30, checkStep)	
 viz.callback(viz.KEYBOARD_EVENT, keyEvent)
